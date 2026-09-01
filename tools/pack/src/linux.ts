@@ -53,7 +53,7 @@ const LINUX_GPU_ONNX_PROVIDER_FILES = [
   "libonnxruntime_providers_tensorrt.so",
 ] as const;
 
-export const LINUX_APPIMAGE_MAX_BYTES = 525_000_000;
+export const LINUX_APPIMAGE_MAX_BYTES = 635_000_000;
 
 export const INTERNAL_PACKAGES = [
   { directory: "packages/release", name: "@open-design/release" },
@@ -667,7 +667,10 @@ async function writeLinuxBuilderConfig(config: ToolPackConfig, paths: LinuxPaths
     artifactName: `${PRODUCT_NAME}-${namespaceToken}.\${ext}`,
     asar: false,
     buildDependenciesFromSource: false,
-    compression: "maximum",
+    // electron-builder maps maximum to XZ with 1 MiB SquashFS blocks. The
+    // resulting FUSE daemon can spend minutes decompressing Electron's startup
+    // reads, while normal uses the substantially faster gzip default.
+    compression: "normal",
     directories: {
       app: paths.assembledAppRoot,
       output: paths.appBuilderOutputRoot,
